@@ -965,6 +965,72 @@ def predict(model, data_predict, ctx, metric, loss_function, batch_size=32, sw=N
 # ############################################################################
 
 
+def logits2probabs(logits):
+    """Model output to probabilities.
+    Sum is 1."""
+    # return 1 / (1 + np.exp(-logits))
+    return mx.nd.softmax(logits, axis=1)
+
+
+def predict_details(model, data_predict, ctx, metric, loss_function, batch_size=32, label_map=None):
+    bert_dataloader = mx.gluon.data.DataLoader(data_predict,
+                                               batch_size=batch_size)
+
+    y_raw, y_pred, y_true, y_label, y_probabs = list(), list(), list(), list(), list()
+
+    with Timer("prediction"):
+        metric.reset()
+        cum_loss = 0
+        for batch_id, (token_ids, valid_length, segment_ids,
+                       label) in enumerate(tqdm(bert_dataloader)):
+            global_step = batch_id
+            # load data to GPU
+            token_ids = token_ids.as_in_context(ctx)
+            valid_length = valid_length.as_in_context(ctx)
+            segment_ids = segment_ids.as_in_context(ctx)
+            label = label.as_in_context(ctx)
+
+            # forward computation
+            out = model(token_ids, segment_ids, valid_length.astype('float32'))
+            label = label.astype('float32')
+            ls = loss_function(out, label).mean()
+
+            y_raw.extend(list(out.asnumpy()))
+
+            probs = logits2probabs(out)
+            y_probabs.extend(list(probs))
+
+            # to binary: 0/1
+            out = out.sigmoid().round().astype('int32')
+            label = label.astype('int32')
+            metric.update([label], [out])
+            cum_loss += ls.asscalar()  # .sum() ?
+
+            y_true_many = label.T[0].asnumpy()
+            y_pred_many = out.asnumpy()
+            y_true.extend(list(y_true_many))
+            y_pred.extend(list(y_pred_many))
+
+            # to numpy (not mxnet)
+            y_label_many = y_pred_many
+            # get mapping type
+            if label_map:
+                y_label_many = [label_map[c[0]] for c in list(y_label_many)]
+            y_label.extend(y_label_many)
+
+    # list to numpy array
+    y_raw = np.array(y_raw)
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    y_label = np.array(y_label)
+    y_probabs = np.array(y_probabs)
+
+    return y_raw, y_true, y_pred, y_label, y_probabs, cum_loss
+
+
+# ############################################################################
+
+
 def predict_proepi(model, data_predict, ctx, metric, loss_function, batch_size=32, sw=None):
     bert_dataloader = mx.gluon.data.DataLoader(data_predict,
                                                batch_size=batch_size)
