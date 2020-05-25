@@ -13,7 +13,7 @@ import seaborn as sns
 
 from bert import *
 from gluonnlp.data import BERTSentenceTransform
-from mxboard import SummaryWriter
+#from mxboard import SummaryWriter
 from mxnet import gluon
 from mxnet.gluon import Block
 from mxnet.gluon import nn
