@@ -2,6 +2,11 @@ original/
 predicted/
 evaluator.*
 .ipynb_checkpoints/*
+__pycache__/
+.vscode/
+
+data/
+cache/
 
 # xlnet data (checkpoints, in-/output of tensorflow)
 data/xlnet-chkp/
