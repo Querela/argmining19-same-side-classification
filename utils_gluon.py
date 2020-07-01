@@ -468,7 +468,7 @@ def train(model,
           **kwargs):
     
     batch_size = kwargs.get("batch_size", 32)
-    num_epochs = kwargs.get("epochs", 3)
+    num_epochs = kwargs.get("num_epochs", kwargs.get("epochs", 3))
     use_checkpoints = kwargs.get("use_checkpoints", True)
     checkpoint_dir = kwargs.get("checkpoint_dir", None)
     if use_checkpoints and checkpoint_dir is None:
@@ -580,7 +580,7 @@ def train_proepi(model,
           **kwargs):
     
     batch_size = kwargs.get("batch_size", 32)
-    num_epochs = kwargs.get("epochs", 3)
+    num_epochs = kwargs.get("num_epochs", kwargs.get("epochs", 3))
     use_checkpoints = kwargs.get("use_checkpoints", True)
     checkpoint_dir = kwargs.get("checkpoint_dir", "data")
 
