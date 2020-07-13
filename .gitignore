@@ -5,6 +5,8 @@ evaluator.*
 __pycache__/
 .vscode/
 
+Untitled.ipynb
+
 data/
 cache/
 
@@ -29,5 +31,6 @@ events.out.tfevents.*.cuda
 
 # repos
 sentence_embedding/
+sentence_embedding.zip
 bert
 xlnet/
